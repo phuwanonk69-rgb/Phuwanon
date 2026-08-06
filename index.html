@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบการจัดการนักศึกษา</title>
-    <!-- ใช้ Google Font (Prompt) -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- โหลด Tailwind CSS ผ่าน CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,33 +17,30 @@
             }
         }
     </script>
+    <style>
+        /* เพิ่ม CSS เล็กน้อยสำหรับลูกศรเรียงลำดับ */
+        th.sortable:hover {
+            background-color: #f1f5f9;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 flex h-screen overflow-hidden font-sans">
 
-    <!-- เมนูด้านซ้าย (Sidebar) -->
+    <!-- Sidebar -->
     <aside class="w-64 bg-slate-800 text-white flex flex-col flex-shrink-0">
-        <div class="p-5 text-xl font-semibold bg-slate-900 text-center">
-            Admin Panel
-        </div>
+        <div class="p-5 text-xl font-semibold bg-slate-900 text-center">Admin Panel</div>
         <nav class="py-5 flex-1">
             <ul class="space-y-1">
-                <li>
-                    <a href="#" class="block py-3 px-5 bg-slate-700 text-white border-l-4 border-blue-500 transition">จัดการนักศึกษา</a>
-                </li>
-                <li>
-                    <a href="#" class="block py-3 px-5 text-slate-400 hover:bg-slate-700 hover:text-white transition">จัดการรายวิชา</a>
-                </li>
-                <li>
-                    <a href="#" class="block py-3 px-5 text-slate-400 hover:bg-slate-700 hover:text-white transition">ผลการเรียน</a>
-                </li>
-                <li>
-                    <a href="#" class="block py-3 px-5 text-slate-400 hover:bg-slate-700 hover:text-white transition">ออกจากระบบ</a>
-                </li>
+                <li><a href="#" class="block py-3 px-5 bg-slate-700 text-white border-l-4 border-blue-500 transition">จัดการนักศึกษา</a></li>
+                <li><a href="#" class="block py-3 px-5 text-slate-400 hover:bg-slate-700 hover:text-white transition">จัดการรายวิชา</a></li>
+                <li><a href="#" class="block py-3 px-5 text-slate-400 hover:bg-slate-700 hover:text-white transition">ผลการเรียน</a></li>
+                <li><a href="#" class="block py-3 px-5 text-slate-400 hover:bg-slate-700 hover:text-white transition">ออกจากระบบ</a></li>
             </ul>
         </nav>
     </aside>
 
-    <!-- เนื้อหาหลัก (Main Content) -->
+    <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-y-auto">
         <header class="bg-white px-8 py-4 shadow-sm flex justify-between items-center">
             <h1 class="text-2xl font-semibold text-slate-800">ระบบการจัดการนักศึกษา</h1>
@@ -69,58 +64,27 @@
             </div>
 
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <!-- ส่วนหัวการ์ด (ค้นหา & ปุ่มเพิ่ม) -->
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <h3 class="text-lg font-medium text-slate-800">รายชื่อนักศึกษาทั้งหมด</h3>
                     <div class="flex gap-3 items-center w-full md:w-auto">
-                        <input type="text" id="searchInput" class="px-3 py-2 border border-slate-300 rounded-md text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ค้นหาชื่อ หรือรหัส..." onkeyup="searchStudent()">
+                        <input type="text" id="searchInput" class="px-3 py-2 border border-slate-300 rounded-md text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ค้นหาชื่อ หรือรหัส..." oninput="searchStudent()">
                         <button onclick="openModal('add')" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition whitespace-nowrap shadow-sm">+ เพิ่มนักศึกษาใหม่</button>
                     </div>
                 </div>
 
-                <!-- ตารางแสดงข้อมูล -->
                 <div class="overflow-x-auto">
-                    <table id="studentTable" class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
-                                <th class="py-3 px-4 font-medium">รหัสนักศึกษา</th>
-                                <th class="py-3 px-4 font-medium">ชื่อ - นามสกุล</th>
-                                <th class="py-3 px-4 font-medium">สาขาวิชา</th>
-                                <th class="py-3 px-4 font-medium">ชั้นปี</th>
+                                <th class="py-3 px-4 font-medium sortable" onclick="sortData('id')">รหัสนักศึกษา <span id="sort-id" class="text-xs text-slate-400"></span></th>
+                                <th class="py-3 px-4 font-medium sortable" onclick="sortData('name')">ชื่อ - นามสกุล <span id="sort-name" class="text-xs text-slate-400"></span></th>
+                                <th class="py-3 px-4 font-medium sortable" onclick="sortData('major')">สาขาวิชา <span id="sort-major" class="text-xs text-slate-400"></span></th>
+                                <th class="py-3 px-4 font-medium sortable" onclick="sortData('year')">ชั้นปี <span id="sort-year" class="text-xs text-slate-400"></span></th>
                                 <th class="py-3 px-4 font-medium">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="studentTableBody" class="divide-y divide-slate-100">
-                            <tr class="hover:bg-slate-50/80 transition">
-                                <td class="py-3 px-4">6601001</td>
-                                <td class="py-3 px-4">นายสมชาย ใจดี</td>
-                                <td class="py-3 px-4">วิทยาการคอมพิวเตอร์</td>
-                                <td class="py-3 px-4">ปี 3</td>
-                                <td class="py-3 px-4 flex gap-2">
-                                    <button onclick="editRow(this)" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
-                                    <button onclick="deleteRow(this)" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/80 transition">
-                                <td class="py-3 px-4">6601002</td>
-                                <td class="py-3 px-4">นางสาวสมหญิง รักเรียน</td>
-                                <td class="py-3 px-4">เทคโนโลยีสารสนเทศ</td>
-                                <td class="py-3 px-4">ปี 2</td>
-                                <td class="py-3 px-4 flex gap-2">
-                                    <button onclick="editRow(this)" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
-                                    <button onclick="deleteRow(this)" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/80 transition">
-                                <td class="py-3 px-4">6601003</td>
-                                <td class="py-3 px-4">นายมานะ อดทน</td>
-                                <td class="py-3 px-4">วิศวกรรมซอฟต์แวร์</td>
-                                <td class="py-3 px-4">ปี 1</td>
-                                <td class="py-3 px-4 flex gap-2">
-                                    <button onclick="editRow(this)" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
-                                    <button onclick="deleteRow(this)" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
-                                </td>
-                            </tr>
+                            <!-- ข้อมูลจะถูกสร้างด้วย JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -128,30 +92,29 @@
         </main>
     </div>
 
-    <!-- Modal สำหรับ เพิ่ม / แก้ไข ข้อมูล -->
+    <!-- Modal -->
     <div id="studentModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center z-50">
         <div class="bg-white p-6 rounded-lg w-96 shadow-xl">
             <h3 id="modalTitle" class="text-lg font-semibold text-slate-800 mb-4">เพิ่มนักศึกษาใหม่</h3>
-            
             <div class="space-y-4">
+                <input type="hidden" id="editIndex"> <!-- เก็บ index ตอนแก้ไข -->
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">รหัสนักศึกษา</label>
-                    <input type="text" id="stdId" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 6601004">
+                    <input type="text" id="stdId" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">ชื่อ - นามสกุล</label>
-                    <input type="text" id="stdName" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น นายสมปอง รักดี">
+                    <input type="text" id="stdName" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">สาขาวิชา</label>
-                    <input type="text" id="stdMajor" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น วิทยาการคอมพิวเตอร์">
+                    <input type="text" id="stdMajor" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">ชั้นปี</label>
-                    <input type="text" id="stdYear" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น ปี 1">
+                    <input type="text" id="stdYear" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
-
             <div class="flex justify-end gap-2 mt-6">
                 <button onclick="closeModal()" class="bg-rose-500 hover:bg-rose-600 text-white text-sm px-4 py-2 rounded-md transition shadow-sm">ยกเลิก</button>
                 <button onclick="saveStudent()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition shadow-sm">บันทึก</button>
@@ -159,183 +122,192 @@
         </div>
     </div>
 
-    <!-- ส่วน JavaScript ควบคุมการทำงาน -->
     <script>
-        let currentMode = 'add';
-        let selectedTr = null;
         const STORAGE_KEY = 'studentManagementData';
+        let studentsData = []; // เก็บข้อมูลส่วนกลาง
+        let currentSort = { column: '', order: 'asc' }; // ตั้งค่าเริ่มต้นการเรียงลำดับ
 
-        function openModal(mode, tr = null) {
-            currentMode = mode;
+        // 1. โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        function initData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                studentsData = JSON.parse(stored);
+            } else {
+                // ข้อมูลตัวอย่างหากยังไม่มีข้อมูล
+                studentsData = [
+                    { id: '6601001', name: 'นายสมชาย ใจดี', major: 'วิทยาการคอมพิวเตอร์', year: 'ปี 3' },
+                    { id: '6601002', name: 'นางสาวสมหญิง รักเรียน', major: 'เทคโนโลยีสารสนเทศ', year: 'ปี 2' },
+                    { id: '6601003', name: 'นายมานะ อดทน', major: 'วิศวกรรมซอฟต์แวร์', year: 'ปี 1' }
+                ];
+                saveToStorage();
+            }
+            renderTable();
+        }
+
+        // 2. ฟังก์ชันแสดงผลตาราง
+        function renderTable(dataToRender = studentsData) {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+
+            dataToRender.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4">${student.id}</td>
+                    <td class="py-3 px-4">${student.name}</td>
+                    <td class="py-3 px-4">${student.major}</td>
+                    <td class="py-3 px-4">${student.year}</td>
+                    <td class="py-3 px-4 flex gap-2">
+                        <button onclick="openModal('edit', ${index})" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
+                        <button onclick="deleteStudent(${index})" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateSummary();
+        }
+
+        // 3. ฟังก์ชันจัดเรียงข้อมูล (Sorting)
+        function sortData(column) {
+            // สลับการเรียงลำดับ Asc/Desc
+            if (currentSort.column === column) {
+                currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.order = 'asc';
+            }
+
+            // ลบลูกศรทั้งหมดก่อน แล้วค่อยเติมให้คอลัมน์ที่ถูกคลิก
+            ['id', 'name', 'major', 'year'].forEach(col => document.getElementById(`sort-${col}`).innerText = '');
+            document.getElementById(`sort-${column}`).innerText = currentSort.order === 'asc' ? '▲' : '▼';
+
+            // จัดเรียง
+            studentsData.sort((a, b) => {
+                let valA = a[column];
+                let valB = b[column];
+                
+                // ใช้ localeCompare เพื่อให้รองรับภาษาไทยได้ดีเยี่ยม
+                if (currentSort.order === 'asc') {
+                    return valA.localeCompare(valB, 'th');
+                } else {
+                    return valB.localeCompare(valA, 'th');
+                }
+            });
+
+            // ค้นหาข้อมูลเดิมที่ค้างอยู่ในช่องค้นหา แล้ว render
+            searchStudent();
+        }
+
+        // 4. ฟังก์ชันค้นหาข้อมูล
+        function searchStudent() {
+            const filter = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = studentsData.filter(student => 
+                student.id.toLowerCase().includes(filter) || 
+                student.name.toLowerCase().includes(filter)
+            );
+            renderTable(filteredData);
+        }
+
+        // 5. บันทึกและซิงค์ข้อมูล
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(studentsData));
+        }
+
+        // ทำให้เว็บอัปเดตอัตโนมัติเมื่อเปิดหลายแท็บและมีการเปลี่ยนแปลงข้อมูล
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY) {
+                studentsData = JSON.parse(e.newValue);
+                renderTable();
+            }
+        });
+
+        // 6. การจัดการ Modal (เพิ่ม / แก้ไข / ลบ)
+        function openModal(mode, index = null) {
             const modal = document.getElementById('studentModal');
-            const modalTitle = document.getElementById('modalTitle');
-            
+            document.getElementById('editIndex').value = index !== null ? index : '';
+
             if (mode === 'add') {
-                modalTitle.innerText = "เพิ่มนักศึกษาใหม่";
+                document.getElementById('modalTitle').innerText = "เพิ่มนักศึกษาใหม่";
                 document.getElementById('stdId').value = '';
                 document.getElementById('stdName').value = '';
                 document.getElementById('stdMajor').value = '';
                 document.getElementById('stdYear').value = '';
             } else if (mode === 'edit') {
-                modalTitle.innerText = "แก้ไขข้อมูลนักศึกษา";
-                selectedTr = tr;
-                document.getElementById('stdId').value = tr.cells[0].innerText;
-                document.getElementById('stdName').value = tr.cells[1].innerText;
-                document.getElementById('stdMajor').value = tr.cells[2].innerText;
-                document.getElementById('stdYear').value = tr.cells[3].innerText;
+                document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลนักศึกษา";
+                const student = studentsData[index];
+                document.getElementById('stdId').value = student.id;
+                document.getElementById('stdName').value = student.name;
+                document.getElementById('stdMajor').value = student.major;
+                document.getElementById('stdYear').value = student.year;
             }
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
 
         function closeModal() {
-            const modal = document.getElementById('studentModal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-        }
-
-        function getStudentsFromTable() {
-            const rows = Array.from(document.querySelectorAll('#studentTableBody tr'));
-            return rows.map((row) => ({
-                id: row.cells[0].innerText.trim(),
-                name: row.cells[1].innerText.trim(),
-                major: row.cells[2].innerText.trim(),
-                year: row.cells[3].innerText.trim()
-            }));
-        }
-
-        function saveStudentsToStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(getStudentsFromTable()));
-            updateSummary();
-        }
-
-        function updateSummary() {
-            const students = getStudentsFromTable();
-            const totalStudents = students.length;
-            const majors = new Set(students.map((student) => student.major));
-            const years = new Set(students.map((student) => student.year));
-
-            document.getElementById('totalStudents').innerText = totalStudents;
-            document.getElementById('majorCount').innerText = majors.size;
-            document.getElementById('yearCount').innerText = years.size;
-        }
-
-        function addStudentRow(student, shouldSave = true) {
-            const tbody = document.getElementById('studentTableBody');
-            const newRow = tbody.insertRow();
-            newRow.className = "hover:bg-slate-50/80 transition";
-            newRow.innerHTML = `
-                <td class="py-3 px-4">${student.id}</td>
-                <td class="py-3 px-4">${student.name}</td>
-                <td class="py-3 px-4">${student.major}</td>
-                <td class="py-3 px-4">${student.year}</td>
-                <td class="py-3 px-4 flex gap-2">
-                    <button onclick="editRow(this)" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
-                    <button onclick="deleteRow(this)" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
-                </td>
-            `;
-            if (shouldSave) {
-                saveStudentsToStorage();
-            }
-        }
-
-        function loadStudentsFromStorage() {
-            const storedData = localStorage.getItem(STORAGE_KEY);
-            const tbody = document.getElementById('studentTableBody');
-
-            if (storedData) {
-                try {
-                    const students = JSON.parse(storedData);
-                    if (Array.isArray(students) && students.length > 0) {
-                        tbody.innerHTML = '';
-                        students.forEach((student) => addStudentRow(student, false));
-                        updateSummary();
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Failed to load students from storage', error);
-                }
-            }
-
-            const existingStudents = getStudentsFromTable();
-            if (existingStudents.length > 0) {
-                saveStudentsToStorage();
-            } else {
-                updateSummary();
-            }
+            document.getElementById('studentModal').classList.add('hidden');
+            document.getElementById('studentModal').classList.remove('flex');
         }
 
         function saveStudent() {
-            const id = document.getElementById('stdId').value;
-            const name = document.getElementById('stdName').value;
-            const major = document.getElementById('stdMajor').value;
-            const year = document.getElementById('stdYear').value;
+            const id = document.getElementById('stdId').value.trim();
+            const name = document.getElementById('stdName').value.trim();
+            const major = document.getElementById('stdMajor').value.trim();
+            const year = document.getElementById('stdYear').value.trim();
+            const editIndex = document.getElementById('editIndex').value;
 
             if (!id || !name || !major || !year) {
                 alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
                 return;
             }
 
-            if (currentMode === 'add') {
-                addStudentRow({ id, name, major, year });
-            } else if (currentMode === 'edit' && selectedTr) {
-                selectedTr.cells[0].innerText = id;
-                selectedTr.cells[1].innerText = name;
-                selectedTr.cells[2].innerText = major;
-                selectedTr.cells[3].innerText = year;
-                saveStudentsToStorage();
+            const studentObj = { id, name, major, year };
+
+            if (editIndex === '') {
+                // โหมดเพิ่มข้อมูลใหม่
+                studentsData.push(studentObj);
+            } else {
+                // โหมดแก้ไขข้อมูล
+                studentsData[editIndex] = studentObj;
             }
+
+            saveToStorage();
+            
+            // หากกำลังเรียงข้อมูลอยู่ ให้จัดเรียงใหม่ทันที
+            if(currentSort.column) sortData(currentSort.column); 
+            else renderTable();
 
             closeModal();
         }
 
-        function editRow(button) {
-            const tr = button.parentElement.parentElement;
-            openModal('edit', tr);
-        }
-
-        function deleteRow(button) {
+        function deleteStudent(index) {
             if (confirm("คุณต้องการลบข้อมูลนักศึกษาคนนี้ใช่หรือไม่?")) {
-                const tr = button.parentElement.parentElement;
-                tr.remove();
-                saveStudentsToStorage();
+                studentsData.splice(index, 1); // ลบข้อมูลออกจาก Array
+                saveToStorage();
+                renderTable();
             }
         }
 
-        function searchStudent() {
-            let input = document.getElementById('searchInput');
-            let filter = input.value.toLowerCase();
-            let table = document.getElementById('studentTable');
-            let tr = table.getElementsByTagName('tr');
+        // 7. สรุปข้อมูล Dashboard
+        function updateSummary() {
+            const majors = new Set(studentsData.map(s => s.major));
+            const years = new Set(studentsData.map(s => s.year));
 
-            for (let i = 1; i < tr.length; i++) {
-                let tdId = tr[i].getElementsByTagName('td')[0];
-                let tdName = tr[i].getElementsByTagName('td')[1];
-                if (tdId || tdName) {
-                    let idText = tdId.textContent || tdId.innerText;
-                    let nameText = tdName.textContent || tdName.innerText;
-                    if (idText.toLowerCase().indexOf(filter) > -1 || nameText.toLowerCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
-                }
-            }
+            document.getElementById('totalStudents').innerText = studentsData.length;
+            document.getElementById('majorCount').innerText = majors.size;
+            document.getElementById('yearCount').innerText = years.size;
         }
 
-        document.getElementById('studentModal').addEventListener('click', function (event) {
-            if (event.target === this) {
-                closeModal();
-            }
+        // ปิด Modal เมื่อคลิกพื้นที่ว่าง หรือกด ESC
+        document.getElementById('studentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
         });
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        loadStudentsFromStorage();
+        // เริ่มต้นการทำงาน
+        initData();
     </script>
 </body>
 </html>
