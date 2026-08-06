@@ -53,6 +53,21 @@
         </header>
 
         <main class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                    <div class="text-sm text-blue-700">นักศึกษาทั้งหมด</div>
+                    <div id="totalStudents" class="text-2xl font-semibold text-blue-900">0</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+                    <div class="text-sm text-emerald-700">สาขาวิชาทั้งหมด</div>
+                    <div id="majorCount" class="text-2xl font-semibold text-emerald-900">0</div>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                    <div class="text-sm text-amber-700">ชั้นปีที่มี</div>
+                    <div id="yearCount" class="text-2xl font-semibold text-amber-900">0</div>
+                </div>
+            </div>
+
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <!-- ส่วนหัวการ์ด (ค้นหา & ปุ่มเพิ่ม) -->
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -148,6 +163,7 @@
     <script>
         let currentMode = 'add';
         let selectedTr = null;
+        const STORAGE_KEY = 'studentManagementData';
 
         function openModal(mode, tr = null) {
             currentMode = mode;
@@ -178,6 +194,77 @@
             modal.classList.add('hidden');
         }
 
+        function getStudentsFromTable() {
+            const rows = Array.from(document.querySelectorAll('#studentTableBody tr'));
+            return rows.map((row) => ({
+                id: row.cells[0].innerText.trim(),
+                name: row.cells[1].innerText.trim(),
+                major: row.cells[2].innerText.trim(),
+                year: row.cells[3].innerText.trim()
+            }));
+        }
+
+        function saveStudentsToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(getStudentsFromTable()));
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const students = getStudentsFromTable();
+            const totalStudents = students.length;
+            const majors = new Set(students.map((student) => student.major));
+            const years = new Set(students.map((student) => student.year));
+
+            document.getElementById('totalStudents').innerText = totalStudents;
+            document.getElementById('majorCount').innerText = majors.size;
+            document.getElementById('yearCount').innerText = years.size;
+        }
+
+        function addStudentRow(student, shouldSave = true) {
+            const tbody = document.getElementById('studentTableBody');
+            const newRow = tbody.insertRow();
+            newRow.className = "hover:bg-slate-50/80 transition";
+            newRow.innerHTML = `
+                <td class="py-3 px-4">${student.id}</td>
+                <td class="py-3 px-4">${student.name}</td>
+                <td class="py-3 px-4">${student.major}</td>
+                <td class="py-3 px-4">${student.year}</td>
+                <td class="py-3 px-4 flex gap-2">
+                    <button onclick="editRow(this)" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
+                    <button onclick="deleteRow(this)" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
+                </td>
+            `;
+            if (shouldSave) {
+                saveStudentsToStorage();
+            }
+        }
+
+        function loadStudentsFromStorage() {
+            const storedData = localStorage.getItem(STORAGE_KEY);
+            const tbody = document.getElementById('studentTableBody');
+
+            if (storedData) {
+                try {
+                    const students = JSON.parse(storedData);
+                    if (Array.isArray(students) && students.length > 0) {
+                        tbody.innerHTML = '';
+                        students.forEach((student) => addStudentRow(student, false));
+                        updateSummary();
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Failed to load students from storage', error);
+                }
+            }
+
+            const existingStudents = getStudentsFromTable();
+            if (existingStudents.length > 0) {
+                saveStudentsToStorage();
+            } else {
+                updateSummary();
+            }
+        }
+
         function saveStudent() {
             const id = document.getElementById('stdId').value;
             const name = document.getElementById('stdName').value;
@@ -190,24 +277,13 @@
             }
 
             if (currentMode === 'add') {
-                const tbody = document.getElementById('studentTableBody');
-                const newRow = tbody.insertRow();
-                newRow.className = "hover:bg-slate-50/80 transition";
-                newRow.innerHTML = `
-                    <td class="py-3 px-4">${id}</td>
-                    <td class="py-3 px-4">${name}</td>
-                    <td class="py-3 px-4">${major}</td>
-                    <td class="py-3 px-4">${year}</td>
-                    <td class="py-3 px-4 flex gap-2">
-                        <button onclick="editRow(this)" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">แก้ไข</button>
-                        <button onclick="deleteRow(this)" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded transition shadow-sm">ลบ</button>
-                    </td>
-                `;
+                addStudentRow({ id, name, major, year });
             } else if (currentMode === 'edit' && selectedTr) {
                 selectedTr.cells[0].innerText = id;
                 selectedTr.cells[1].innerText = name;
                 selectedTr.cells[2].innerText = major;
                 selectedTr.cells[3].innerText = year;
+                saveStudentsToStorage();
             }
 
             closeModal();
@@ -222,6 +298,7 @@
             if (confirm("คุณต้องการลบข้อมูลนักศึกษาคนนี้ใช่หรือไม่?")) {
                 const tr = button.parentElement.parentElement;
                 tr.remove();
+                saveStudentsToStorage();
             }
         }
 
@@ -245,6 +322,20 @@
                 }
             }
         }
+
+        document.getElementById('studentModal').addEventListener('click', function (event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        loadStudentsFromStorage();
     </script>
 </body>
 </html>
