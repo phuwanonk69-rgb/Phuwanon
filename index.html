@@ -108,11 +108,24 @@
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">สาขาวิชา</label>
-                    <input type="text" id="stdMajor" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="stdMajor" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="" disabled selected>-- เลือกสาขาวิชา --</option>
+                        <option value="วิทยาการคอมพิวเตอร์">วิทยาการคอมพิวเตอร์</option>
+                        <option value="เทคโนโลยีสารสนเทศ">เทคโนโลยีสารสนเทศ</option>
+                        <option value="วิศวกรรมซอฟต์แวร์">วิศวกรรมซอฟต์แวร์</option>
+                        <option value="วิทยาการข้อมูล">วิทยาการข้อมูล</option>
+                        <option value="ปัญญาประดิษฐ์">ปัญญาประดิษฐ์</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">ชั้นปี</label>
-                    <input type="text" id="stdYear" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="stdYear" class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="" disabled selected>-- เลือกชั้นปี --</option>
+                        <option value="ปี 1">ปี 1</option>
+                        <option value="ปี 2">ปี 2</option>
+                        <option value="ปี 3">ปี 3</option>
+                        <option value="ปี 4">ปี 4</option>
+                    </select>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-6">
@@ -141,7 +154,9 @@
                 ];
                 saveToStorage();
             }
-            renderTable();
+            
+            // เรียงลำดับตาม 'รหัสนักศึกษา' (id) ตั้งแต่เริ่มโหลด
+            sortData('id');
         }
 
         // 2. ฟังก์ชันแสดงผลตาราง
@@ -230,8 +245,8 @@
                 document.getElementById('modalTitle').innerText = "เพิ่มนักศึกษาใหม่";
                 document.getElementById('stdId').value = '';
                 document.getElementById('stdName').value = '';
-                document.getElementById('stdMajor').value = '';
-                document.getElementById('stdYear').value = '';
+                document.getElementById('stdMajor').value = ''; // รีเซ็ต Dropdown กลับไปที่ค่าว่าง
+                document.getElementById('stdYear').value = '';  // รีเซ็ต Dropdown กลับไปที่ค่าว่าง
             } else if (mode === 'edit') {
                 document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลนักศึกษา";
                 const student = studentsData[index];
@@ -252,8 +267,8 @@
         function saveStudent() {
             const id = document.getElementById('stdId').value.trim();
             const name = document.getElementById('stdName').value.trim();
-            const major = document.getElementById('stdMajor').value.trim();
-            const year = document.getElementById('stdYear').value.trim();
+            const major = document.getElementById('stdMajor').value;
+            const year = document.getElementById('stdYear').value;
             const editIndex = document.getElementById('editIndex').value;
 
             if (!id || !name || !major || !year) {
